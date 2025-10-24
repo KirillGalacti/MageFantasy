@@ -8,8 +8,8 @@ public class ColorChange : MonoBehaviour
     [Tooltip("Вкл — безопаснее для общих материалов (без их дублирования). Выкл — проще.")]
     [SerializeField] private bool usePropertyBlock = false;
 
-    private Material runtimeMaterial;               // вариант попроще (instanced material)
-    private MaterialPropertyBlock mpb;              // вариант безопасный (PropertyBlock)
+    private Material runtimeMaterial;// вариант попроще (instanced material)
+    private MaterialPropertyBlock mpb; // вариант безопасный (PropertyBlock)
 
     private static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorID = Shader.PropertyToID("_Color");
