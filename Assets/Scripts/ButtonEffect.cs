@@ -1,82 +1,72 @@
 using UnityEngine;
+using Mirror;
 
 [RequireComponent(typeof(Collider))]
-public class ButtonEffect : MonoBehaviour
+public class ButtonEffect : NetworkBehaviour
 {
     [Header("Искры")]
-    [SerializeField] private ParticleSystem[] _sparks;   // можно одну или несколько
-    [SerializeField] private Transform _pointSparks;      // точка появления (опционально)
+    [SerializeField] private GameObject _sparks;
 
-    [Header("Фильтр активации")]
-    [SerializeField] private string _playerTag = "Player";
-
-    private int _playerOverlapCount = 0;
-    private Collider _collider;
+    [Header("Точка появления (опционально)")]
+    [SerializeField] private Transform _pointSparks;
 
     private void Awake()
     {
-        _collider = GetComponent<Collider>();
-        _collider.isTrigger = true;
-
-        StopAllEffects(); // на старте искры выключены
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!IsPlayer(other)) return;
-
-        _playerOverlapCount++;
-        if (_playerOverlapCount == 1)
-            PlayAllEffects();
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (!IsPlayer(other)) return;
-
-        _playerOverlapCount = Mathf.Max(0, _playerOverlapCount - 1);
-        if (_playerOverlapCount == 0)
-            StopAllEffects();
-    }
-
-    private bool IsPlayer(Collider other)
-    {
-        return other.CompareTag(_playerTag);
-    }
-
-    private void PlayAllEffects()
-    {
-        if (_sparks == null) return;
-
-        foreach (var ps in _sparks)
+        if (!_sparks)
         {
-            if (ps == null) continue;
+            Debug.LogError("[ButtonEffect] Particle System не установлен. Скрипт отключен.");
+            enabled = false;
+            return;
+        }
 
-            // Если задана точка — телепортируем эмиттеры в неё
-            if (_pointSparks != null)
-                ps.transform.position = _pointSparks.position;
-
-            var emission = ps.emission;
-            emission.enabled = true;
-
-            if (!ps.isPlaying)
-                ps.Play(true);
+        if (!_pointSparks)
+        {
+            Debug.LogWarning("[ButtonEffect] Точка создания не задана. Будет использована позиция персонажа.");
         }
     }
 
-    private void StopAllEffects()
+    private void Update()
+    {
+        if (!isLocalPlayer) return;
+
+        if (Input.GetKeyDown(KeyCode.E)) Trigger();
+    }
+
+    private void Trigger()
+    {
+        Vector3 spawnPos = _pointSparks ? _pointSparks.position : transform.position;
+
+        if (isServer)
+        {
+            // Хост: сразу рассылаем всем
+            PlaySpark(spawnPos);
+        }
+        else
+        {
+            // Клиент: просим сервер разослать всем
+            CmdRequestEffect(spawnPos);
+        }
+    }
+
+    [Command]
+    private void CmdRequestEffect(Vector3 worldPos)
+    {
+        // Сервер -> всем клиентам
+        PlaySpark(worldPos);
+    }
+
+    [Server]
+    private void PlaySpark(Vector3 pos)
     {
         if (_sparks == null) return;
 
-        foreach (var ps in _sparks)
-        {
-            if (ps == null) continue;
+        GameObject sparkSpawn = Instantiate(
+            original: _sparks, 
+            position: pos, 
+            rotation: Quaternion.identity
+            );
 
-            // мгновенно гасим и чистим «хвост»
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        NetworkServer.Spawn(sparkSpawn);
 
-            var emission = ps.emission;
-            emission.enabled = false;
-        }
     }
 }

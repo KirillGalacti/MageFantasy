@@ -1,60 +1,69 @@
 using UnityEngine;
+using Mirror;
 
-public class ColorChange : MonoBehaviour
+public class ColorChange : NetworkBehaviour
 {
-    [Header("≈сли пусто Ч возьмЄм Renderer с этого объекта")]
-    [SerializeField] private Renderer targetRenderer;
+    [SerializeField] private Renderer _targetRenderer;
 
-    [Tooltip("¬кл Ч безопаснее дл€ общих материалов (без их дублировани€). ¬ыкл Ч проще.")]
-    [SerializeField] private bool usePropertyBlock = false;
+    [SerializeField] private Material _material;
 
-    private Material runtimeMaterial;// вариант попроще (instanced material)
-    private MaterialPropertyBlock mpb; // вариант безопасный (PropertyBlock)
-
-    private static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
-    private static readonly int ColorID = Shader.PropertyToID("_Color");
+    // —ервер хранит правду про цвет и рассылает всем.
+    [SyncVar(hook = nameof(OnColorChanged))]
+    private Color syncedColor = Color.white;
 
     private void Awake()
     {
-        if (!targetRenderer) targetRenderer = GetComponent<Renderer>();
-        if (!targetRenderer)
+        _targetRenderer = GetComponent<Renderer>();
+        if (!_targetRenderer)
         {
-            Debug.LogError("[PlayerColorSwitcher] Renderer не найден.");
+            Debug.LogError("[ChangeColor] Renderer не найден. —крипт отключен.");
             enabled = false;
             return;
         }
+        _material = _targetRenderer.material; // свой инстанс материала дл€ этого Renderer
+    }
 
-        if (usePropertyBlock)
-        {
-            mpb = new MaterialPropertyBlock();
-            targetRenderer.GetPropertyBlock(mpb);
-        }
-        else
-        {
-            // —оздаст экземпл€р материала только дл€ этого Renderer
-            runtimeMaterial = targetRenderer.material;
-        }
+    public override void OnStartClient()
+    {
+        Apply(syncedColor); // при подключении сразу поставить актуальный цвет
     }
 
     private void Update()
     {
+        if (!isLocalPlayer) return; // слушаем клавиши только у владельца
+
         if (Input.GetKeyDown(KeyCode.R)) SetColor(Color.red);
         if (Input.GetKeyDown(KeyCode.G)) SetColor(Color.green);
         if (Input.GetKeyDown(KeyCode.B)) SetColor(Color.blue);
     }
 
+    // если мы сервер Ч пишем SyncVar, иначе шлЄм команду.
     private void SetColor(Color c)
     {
-        if (usePropertyBlock)
+        if (isServer)
         {
-            // ѕишем и в _BaseColor (URP/HDRP), и в _Color (Built-in) Ч что-то одно точно сработает
-            mpb.SetColor(BaseColorID, c);
-            mpb.SetColor(ColorID, c);
-            targetRenderer.SetPropertyBlock(mpb);
+            syncedColor = c;
         }
         else
         {
-            runtimeMaterial.color = c;
+            CmdSetColor(c);
         }
+    }
+
+    [Command]
+    private void CmdSetColor(Color c)
+    {
+        syncedColor = c;
+    }
+
+    // Mirror вызывает на всех, когда syncedColor помен€лс€.
+    private void OnColorChanged(Color _, Color newC)
+    {
+        Apply(newC);
+    }
+
+    private void Apply(Color c)
+    {
+        _material.color = c;
     }
 }

@@ -226,6 +226,7 @@ GameObject:
   - component: {fileID: 5393215578589016654}
   - component: {fileID: 5393215578589016655}
   - component: {fileID: 5393215578589016640}
+  - component: {fileID: 6317174189010920957}
   m_Layer: 8
   m_Name: Capsule
   m_TagString: Untagged
@@ -327,6 +328,23 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6317174189010920957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5393215578589016642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 514dc717e11c2884fab2cd9d23c2ec46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ColorChange
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _targetRenderer: {fileID: 5393215578589016655}
+  _material: {fileID: 2100000, guid: 6b911390c5825014e8377183a7837d3f, type: 2}
 --- !u!1 &7160599073979030030
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,7 +483,8 @@ GameObject:
   - component: {fileID: 5253089690092473644}
   - component: {fileID: 4074359477632301274}
   - component: {fileID: -1942216130323517132}
-  - component: {fileID: 3845651610190691289}
+  - component: {fileID: 2819734611218226179}
+  - component: {fileID: 6187412821147975653}
   m_Layer: 8
   m_Name: PlayerCapsule
   m_TagString: Player
@@ -750,7 +769,7 @@ MonoBehaviour:
   syncInterval: 0
   clientAuthority: 0
   animator: {fileID: 0}
---- !u!114 &3845651610190691289
+--- !u!114 &2819734611218226179
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -759,8 +778,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 8616685848737228372}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 514dc717e11c2884fab2cd9d23c2ec46, type: 3}
+  m_Script: {fileID: 11500000, guid: dade736208e370d468ba5614ae48eca8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ColorChange
-  targetRenderer: {fileID: 5393215578589016655}
-  usePropertyBlock: 0
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonEffect
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _sparks: {fileID: 3180717349413528096, guid: 089c2de4423a02146ad6093b95c89f8b, type: 3}
+  _pointSparks: {fileID: 3517815385522995981, guid: f261f93a7871e0449a917b41fbc2703c, type: 3}
+--- !u!114 &6187412821147975653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616685848737228372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48d210d638032e946b5cb6ac96789588, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CreatedObject
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _createdObject: {fileID: 5816782457773634850, guid: f08b8ac8823059d46ac44e5f3b1d3ca8, type: 3}
+  _pointSpawn: {fileID: 3517815385522995981, guid: f261f93a7871e0449a917b41fbc2703c, type: 3}
